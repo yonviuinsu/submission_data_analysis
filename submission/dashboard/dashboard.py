@@ -3,6 +3,10 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 import numpy as np
+import os
+
+st.subheader("Daftar File dalam Direktori:")
+st.write(os.listdir())
 
 # Konfigurasi halaman Streamlit
 st.set_page_config(
