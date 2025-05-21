@@ -22,7 +22,7 @@ st.title("Dashboard Analisis Penyewaan Sepeda")
 @st.cache_data
 def load_data():
     try:
-        data = pd.read_csv("day.csv")
+        data = pd.read_csv("submission/dashboard/day.csv")
         return data
     except FileNotFoundError:
         st.error("File 'day.csv' tidak ditemukan. Silakan periksa jalur file.")
