@@ -4,16 +4,15 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import numpy as np
 import os
-
-st.subheader("Daftar File dalam Direktori:")
-st.write(os.listdir())
-
 # Konfigurasi halaman Streamlit
 st.set_page_config(
     page_title="Dashboard Analisis Penyewaan Sepeda",
     page_icon="🚲",
     layout="wide"
 )
+st.subheader("Daftar File dalam Direktori:")
+st.write(os.listdir())
+
 
 # Judul utama
 st.title("Dashboard Analisis Penyewaan Sepeda")
