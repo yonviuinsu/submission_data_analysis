@@ -251,7 +251,7 @@ if not filtered_df.empty:
             )
             ax6.set_title('Proporsi Pengguna pada Hari Libur')
             plt.tight_layout()
-            st.pyplot(fig6)
+            st.pyplot(fig7)
         else:
             st.info("Tidak ada data hari libur yang tersedia dengan filter yang dipilih.")
             
@@ -271,7 +271,7 @@ if not filtered_df.empty:
             )
             ax7.set_title('Proporsi Pengguna pada Hari Kerja')
             plt.tight_layout()
-            st.pyplot(fig7)
+            st.pyplot(fig8)
         else:
             st.info("Tidak ada data hari kerja yang tersedia dengan filter yang dipilih.")
     
