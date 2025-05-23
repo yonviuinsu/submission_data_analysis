@@ -94,11 +94,11 @@ st.header("Analisis Tren dan Faktor yang Mempengaruhi Peminjaman Sepeda")
 if not filtered_df.empty:
     st.subheader("Pertanyaan: Bagaimana tren jumlah peminjaman sepeda harian selama dua tahun terakhir, dan faktor apa saja yang memengaruhinya (musim, cuaca, hari kerja/libur)?")
     
-    # Membagi visualisasi menjadi beberapa baris 
-    col1, col2 = st.columns(2)
+    # Menggunakan tabs untuk visualisasi pertama
+    trend_tabs = st.tabs(["Tren Harian", "Berdasarkan Musim", "Berdasarkan Cuaca", "Hari Kerja vs Libur"])
     
-    # Visualisasi 1: Tren Harian
-    with col1:
+    # Tab 1: Tren Harian
+    with trend_tabs[0]:
         st.subheader("Tren Jumlah Peminjaman Sepeda Harian")
         fig1, ax1 = plt.subplots(figsize=(10, 5))
         ax1.plot(filtered_df['date'], filtered_df['cnt'], label='Jumlah Peminjam Harian', color='tab:blue', linewidth=1)
@@ -109,8 +109,8 @@ if not filtered_df.empty:
         plt.tight_layout()
         st.pyplot(fig1)
     
-    # Visualisasi 2: Berdasarkan Musim
-    with col2:
+    # Tab 2: Berdasarkan Musim
+    with trend_tabs[1]:
         st.subheader("Rata-rata Jumlah Peminjam per Musim")
         fig2, ax2 = plt.subplots(figsize=(10, 5))
         seasonal_avg = filtered_df.groupby('season_name')['cnt'].mean().reset_index()
@@ -121,10 +121,8 @@ if not filtered_df.empty:
         plt.tight_layout()
         st.pyplot(fig2)
     
-    col3, col4 = st.columns(2)
-    
-    # Visualisasi 3: Berdasarkan Kondisi Cuaca
-    with col3:
+    # Tab 3: Berdasarkan Kondisi Cuaca
+    with trend_tabs[2]:
         st.subheader("Rata-rata Jumlah Peminjam per Kondisi Cuaca")
         fig3, ax3 = plt.subplots(figsize=(10, 5))
         weather_avg = filtered_df.groupby('weather_name')['cnt'].mean().reset_index()
@@ -135,8 +133,8 @@ if not filtered_df.empty:
         plt.tight_layout()
         st.pyplot(fig3)
     
-    # Visualisasi 4: Berdasarkan Status Hari
-    with col4:
+    # Tab 4: Berdasarkan Status Hari
+    with trend_tabs[3]:
         st.subheader("Hari Kerja vs Hari Libur")
         fig4, ax4 = plt.subplots(figsize=(10, 5))
         sns.barplot(
@@ -175,46 +173,49 @@ Berdasarkan analisis di atas:
 4. **Faktor Hari Kerja/Libur**: Hari kerja umumnya memiliki jumlah peminjam lebih tinggi dibanding hari libur, menunjukkan bahwa sepeda banyak digunakan untuk aktivitas rutin seperti perjalanan ke tempat kerja.
 """)
 
+
 # Bagian Pertanyaan Analisis 2: Perbandingan pola peminjaman antara casual vs registered
 st.header("Analisis Perbandingan Tipe Pengguna")
 
 if not filtered_df.empty:
     st.subheader("Pertanyaan: Bagaimana perbandingan pola peminjaman antara pengguna casual dan registered berdasarkan hari kerja dan hari libur?")
     
-    # Visualisasi perbandingan casual vs registered
-    st.subheader("Perbandingan Pengguna Casual vs Registered")
+    # Menggunakan tabs untuk visualisasi kedua
+    user_tabs = st.tabs(["Perbandingan Pengguna", "Proporsi Hari Libur", "Proporsi Hari Kerja"])
     
-    fig5, ax5 = plt.subplots(figsize=(12, 6))
-    user_comparison = filtered_df.melt(
-        id_vars=['workingday'],
-        value_vars=['casual', 'registered'],
-        var_name='User Type',
-        value_name='Count'
-    )
+    # Tab 1: Perbandingan Pengguna
+    with user_tabs[0]:
+        st.subheader("Perbandingan Pengguna Casual vs Registered")
+        
+        fig5, ax5 = plt.subplots(figsize=(12, 6))
+        user_comparison = filtered_df.melt(
+            id_vars=['workingday'],
+            value_vars=['casual', 'registered'],
+            var_name='User Type',
+            value_name='Count'
+        )
+        
+        sns.barplot(
+            data=user_comparison,
+            x='workingday',
+            y='Count',
+            hue='User Type',
+            estimator=np.mean,
+            errorbar=None,
+            palette='viridis',
+            ax=ax5
+        )
+        
+        ax5.set_xticklabels(['Hari Libur', 'Hari Kerja'])
+        ax5.set_title('Rata-rata Jumlah Peminjam Casual vs Registered\n(Hari Kerja vs Hari Libur)')
+        ax5.set_xlabel('Jenis Hari')
+        ax5.set_ylabel('Rata-rata Jumlah Peminjam')
+        ax5.legend(title='Tipe Pengguna')
+        plt.tight_layout()
+        st.pyplot(fig5)
     
-    sns.barplot(
-        data=user_comparison,
-        x='workingday',
-        y='Count',
-        hue='User Type',
-        estimator=np.mean,
-        errorbar=None,
-        palette='viridis',
-        ax=ax5
-    )
-    
-    ax5.set_xticklabels(['Hari Libur', 'Hari Kerja'])
-    ax5.set_title('Rata-rata Jumlah Peminjam Casual vs Registered\n(Hari Kerja vs Hari Libur)')
-    ax5.set_xlabel('Jenis Hari')
-    ax5.set_ylabel('Rata-rata Jumlah Peminjam')
-    ax5.legend(title='Tipe Pengguna')
-    plt.tight_layout()
-    st.pyplot(fig5)
-    
-    # Menambahkan visualisasi perbandingan proporsi dalam bentuk pie chart
-    col5, col6 = st.columns(2)
-    
-    with col5:
+    # Tab 2: Proporsi Tipe Pengguna (Hari Libur)
+    with user_tabs[1]:
         st.subheader("Proporsi Tipe Pengguna (Hari Libur)")
         holiday_data = filtered_df[filtered_df['workingday'] == 0]
         if not holiday_data.empty:
@@ -233,7 +234,8 @@ if not filtered_df.empty:
         else:
             st.info("Tidak ada data hari libur yang tersedia dengan filter yang dipilih.")
             
-    with col6:
+    # Tab 3: Proporsi Tipe Pengguna (Hari Kerja)
+    with user_tabs[2]:
         st.subheader("Proporsi Tipe Pengguna (Hari Kerja)")
         workday_data = filtered_df[filtered_df['workingday'] == 1]
         if not workday_data.empty:
