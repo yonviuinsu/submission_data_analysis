@@ -295,3 +295,77 @@ if not filtered_df.empty:
     """)
 else:
     st.warning("Tidak ada data yang sesuai dengan filter yang dipilih.")
+
+# Bagian Pertanyaan Analisis 3: Korelasi variabel cuaca dengan jumlah peminjaman sepeda
+st.header("Analisis Pengaruh Faktor Cuaca")
+
+if not filtered_df.empty:
+    st.subheader("Pertanyaan: Bagaimana pengaruh faktor cuaca (suhu, kelembapan, kecepatan angin) terhadap jumlah peminjaman sepeda?")
+        
+    # Membuat tabs untuk visualisasi ketiga
+    weather_tabs = st.tabs(["Korelasi", "Hubungan Faktor Cuaca"])
+        
+    # Tab 1: Heatmap Korelasi
+    with weather_tabs[0]:
+        st.subheader("Korelasi Variabel Cuaca dengan Jumlah Peminjaman")
+            
+        # Menghitung korelasi variabel numerik
+        num_cols = ['temp', 'atemp', 'hum', 'windspeed', 'cnt']
+        corr = filtered_df[num_cols].corr()
+            
+        fig9, ax9 = plt.subplots(figsize=(10, 8))
+        sns.heatmap(corr, annot=True, cmap='coolwarm', fmt=".2f", ax=ax9)
+        ax9.set_title('Heatmap Korelasi Variabel Numerik dengan Jumlah Peminjam Sepeda')
+        plt.tight_layout()
+        st.pyplot(fig9)
+        
+    # Tab 2: Scatter plots
+    with weather_tabs[1]:
+        st.subheader("Hubungan Faktor Cuaca dengan Jumlah Peminjaman")
+            
+        fig10, axs = plt.subplots(1, 3, figsize=(18, 5))
+            
+        sns.scatterplot(data=filtered_df, x='temp', y='cnt', ax=axs[0])
+        axs[0].set_title('Suhu vs Jumlah Peminjam')
+        axs[0].set_xlabel('Suhu (Normalisasi)')
+        axs[0].set_ylabel('Jumlah Peminjam')
+            
+        sns.scatterplot(data=filtered_df, x='hum', y='cnt', ax=axs[1])
+        axs[1].set_title('Kelembapan vs Jumlah Peminjam')
+        axs[1].set_xlabel('Kelembapan (Normalisasi)')
+        axs[1].set_ylabel('Jumlah Peminjam')
+            
+        sns.scatterplot(data=filtered_df, x='windspeed', y='cnt', ax=axs[2])
+        axs[2].set_title('Kecepatan Angin vs Jumlah Peminjam')
+        axs[2].set_xlabel('Kecepatan Angin (Normalisasi)')
+        axs[2].set_ylabel('Jumlah Peminjam')
+            
+        plt.tight_layout()
+        st.pyplot(fig10)
+        
+    # Kesimpulan Analisis
+    st.subheader("Jawaban dan Kesimpulan")
+    st.write("""
+    Berdasarkan analisis pengaruh faktor cuaca terhadap jumlah peminjaman sepeda:
+        
+    1. **Suhu (temp, atemp)**:
+        - Memiliki korelasi positif yang cukup kuat dengan jumlah peminjam sepeda
+        - Semakin hangat suhu, semakin banyak peminjaman sepeda
+        - Ini menunjukkan bahwa kondisi hangat lebih disukai untuk aktivitas bersepeda
+        
+    2. **Kelembapan (hum)**:
+        - Memiliki korelasi negatif dengan jumlah peminjaman
+        - Kelembapan tinggi cenderung menurunkan minat peminjaman sepeda
+        - Kondisi lembab mungkin kurang nyaman untuk bersepeda
+        
+    3. **Kecepatan Angin (windspeed)**:
+        - Juga memiliki korelasi negatif, namun lebih lemah dibanding kelembapan
+        - Angin kencang dapat membuat perjalanan bersepeda lebih sulit dan kurang nyaman
+        
+    4. **Implikasi Bisnis**:
+        - Perencanaan persediaan sepeda dapat dioptimalkan berdasarkan prediksi cuaca
+        - Promosi khusus dapat dilakukan pada hari-hari dengan kondisi cuaca yang kurang ideal
+        - Pertimbangan untuk menyediakan fasilitas perlindungan atau penyewaan perlengkapan tambahan pada kondisi cuaca tertentu
+    """)
+else:
+    st.warning("Tidak ada data yang sesuai dengan filter yang dipilih.")
