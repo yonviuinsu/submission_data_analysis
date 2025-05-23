@@ -18,10 +18,12 @@ st.title("Bike Sharing Analysis Dashboard")
 # Load dataset (adjust the path to where your processed dataset is stored)
 @st.cache_data
 def load_data():
-    day_df = pd.read_csv('day.csv')
-    # Convert date column to datetime
+    base_dir = os.path.dirname(__file__)  
+    csv_path = os.path.join(base_dir, "day.csv")
+    day_df = pd.read_csv(csv_path)
     day_df['date'] = pd.to_datetime(day_df['dteday'])
     return day_df
+
 
 # Load the data
 day_df = load_data()
