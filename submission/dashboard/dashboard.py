@@ -139,14 +139,29 @@ with tab4:
     st.header("Rata-rata Jumlah Peminjam Sepeda (Hari Kerja vs Hari Libur)")
     
     if not filtered_df.empty:
-        fig4, ax4 = plt.subplots(figsize=(10, 6))
-        # Create labels for better readability
-        filtered_df['workingday_label'] = filtered_df['workingday'].map({0: 'Hari Libur', 1: 'Hari Kerja'})
-        workday_avg = filtered_df.groupby('workingday_label')['cnt'].mean().reset_index()
-        sns.barplot(x='workingday_label', y='cnt', data=workday_avg, palette='pastel', ax=ax4)
-        ax4.set_title('Rata-rata Jumlah Peminjam Sepeda (Hari Kerja vs Hari Libur)')
+        # Membuat grafik batang untuk membandingkan hari kerja dan hari libur
+        fig4, ax4 = plt.subplots(figsize=(6, 4))
+        
+        # Menggunakan variabel 'workingday' langsung dengan label yang lebih deskriptif
+        sns.barplot(
+            x='workingday', 
+            y='cnt', 
+            hue='workingday',
+            data=filtered_df, 
+            estimator=np.mean, 
+            errorbar=None, 
+            palette='pastel',
+            ax=ax4
+        )
+        
+        # Mengubah label x-axis untuk keterbacaan yang lebih baik
+        ax4.set_xticklabels(['Hari Libur', 'Hari Kerja'])
+        
+        ax4.set_title('Rata-rata Jumlah Peminjam Sepeda\n(Hari Kerja vs Hari Libur)')
         ax4.set_xlabel('Jenis Hari')
         ax4.set_ylabel('Rata-rata Jumlah Peminjam')
+        ax4.legend([],[], frameon=False)  # Menghilangkan legend karena redundan dengan x-labels
+        
         plt.tight_layout()
         st.pyplot(fig4)
     else:
