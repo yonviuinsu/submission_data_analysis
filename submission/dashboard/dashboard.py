@@ -373,10 +373,21 @@ else:
 # Bagian Pertanyaan Analisis 4: Analisis tren musiman dan pertumbuhan tahunan
 st.header("Analisis Tren Musiman dan Pertumbuhan Tahunan")
 
+# Debug day_df
+st.write("Jumlah baris di day_df:", len(day_df))
+st.write("Kolom di day_df:", day_df.columns)
+st.write("Data pertama di day_df:", day_df.head())
+st.write("Tahun yang ada di day_df:", day_df['date'].dt.year.unique())
+
 # Tambahkan kolom untuk keperluan analisis
 day_df['year'] = day_df['date'].dt.year - 2011  # 0 untuk 2011, 1 untuk 2012
 day_df['month'] = day_df['date'].dt.month
 day_df['total_count'] = day_df['cnt']  # Menggunakan total count untuk analisis
+
+st.write("Setelah menambahkan kolom:")
+st.write("Jumlah baris di day_df:", len(day_df))
+st.write("Kolom di day_df:", day_df.columns)
+st.write("Data pertama di day_df:", day_df.head())
 
 st.subheader("Pertanyaan: Bagaimana pola tren musiman dan pertumbuhan tahunan peminjaman sepeda selama periode 2011-2012?")
 
@@ -388,12 +399,12 @@ with trend_tabs[0]:
     st.subheader("Tren Musiman Peminjaman Sepeda per Bulan")
     
     # Visualisasi tren musiman per bulan
-    fig11, ax11 = plt.subplots(figsize=(12, 6))
     monthly_data = day_df.groupby(['year', 'month'])['total_count'].mean().reset_index()
+    st.write("Data untuk Tren Bulanan:", monthly_data)
     month_names = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
     monthly_data['month_name'] = monthly_data['month'].apply(lambda x: month_names[x-1])
 
-    # Plot untuk setiap tahun
+    fig11, ax11 = plt.subplots(figsize=(12, 6))
     for year in [0, 1]:  # Tahun 2011 (0) dan 2012 (1)
         year_data = monthly_data[monthly_data['year'] == year]
         ax11.plot(year_data['month'], year_data['total_count'], 
@@ -410,16 +421,18 @@ with trend_tabs[0]:
     ax11.legend()
     plt.tight_layout()
     st.pyplot(fig11)
+    plt.clf()
 
 # Tab 2: Perbandingan Kuartal
 with trend_tabs[1]:
     st.subheader("Perbandingan Rata-rata Peminjaman per Kuartal")
     
     # Visualisasi tren jangka panjang: perbandingan kuartal antar tahun
-    fig12, ax12 = plt.subplots(figsize=(10, 6))
     day_df['quarter'] = ((day_df['month']-1) // 3) + 1
     quarterly_data = day_df.groupby(['year', 'quarter'])['total_count'].mean().reset_index()
+    st.write("Data untuk Perbandingan Kuartal:", quarterly_data)
 
+    fig12, ax12 = plt.subplots(figsize=(10, 6))
     sns.barplot(x='quarter', y='total_count', hue='year', 
               palette=['skyblue', 'orange'],
               data=quarterly_data, ax=ax12)
@@ -432,17 +445,19 @@ with trend_tabs[1]:
     ax12.grid(axis='y', alpha=0.3)
     plt.tight_layout()
     st.pyplot(fig12)
+    plt.clf()
 
 # Tab 3: Pola Mingguan
 with trend_tabs[2]:
     st.subheader("Perbandingan Pola Mingguan Antar Tahun")
     
     # Visualisasi perbandingan hari dalam seminggu antara tahun 2011 dan 2012
-    fig13, ax13 = plt.subplots(figsize=(12, 6))
     weekday_data = day_df.groupby(['year', 'weekday'])['total_count'].mean().reset_index()
+    st.write("Data untuk Pola Mingguan:", weekday_data)
     day_names = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu']
     weekday_data['day_name'] = weekday_data['weekday'].apply(lambda x: day_names[x])
 
+    fig13, ax13 = plt.subplots(figsize=(12, 6))
     sns.lineplot(data=weekday_data, x='weekday', y='total_count', hue='year', 
                marker='o', markersize=10, linewidth=2,
                palette=['skyblue', 'orange'], ax=ax13)
@@ -455,6 +470,7 @@ with trend_tabs[2]:
     ax13.grid(alpha=0.3)
     plt.tight_layout()
     st.pyplot(fig13)
+    plt.clf()
 
 # Kesimpulan Analisis
 st.subheader("Jawaban dan Kesimpulan")
