@@ -374,7 +374,6 @@ else:
 st.header("Analisis Tren Musiman dan Pertumbuhan Tahunan")
 
 # Tambahkan kolom untuk keperluan analisis
-# Tidak perlu membuat dataframe baru
 day_df['year'] = day_df['date'].dt.year - 2011  # 0 untuk 2011, 1 untuk 2012
 day_df['month'] = day_df['date'].dt.month
 day_df['total_count'] = day_df['cnt']  # Menggunakan total count untuk analisis
