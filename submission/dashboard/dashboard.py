@@ -215,6 +215,27 @@ if not filtered_df.empty:
         st.pyplot(fig5)
     
     # Tab 2: Proporsi Tipe Pengguna (Hari Libur)
+    # Tab 2: Proporsi Tipe Pengguna (Hari Libur)
+    with user_tabs[1]:
+        st.subheader("Pola Mingguan Pengguna Casual vs Registered")
+        
+        # Visualisasi tren pola mingguan untuk pengguna casual dan registered
+        fig6, ax6 = plt.subplots(figsize=(12, 6))
+        weekday_avg = filtered_df.groupby('weekday')[['casual', 'registered']].mean().reset_index()
+        weekday_avg['day_name'] = weekday_avg['weekday'].apply(lambda x: ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'][x])
+        
+        ax6.plot(weekday_avg['weekday'], weekday_avg['casual'], marker='o', linewidth=2, label='Casual')
+        ax6.plot(weekday_avg['weekday'], weekday_avg['registered'], marker='s', linewidth=2, label='Registered')
+        ax6.set_xlabel('Hari dalam Seminggu')
+        ax6.set_ylabel('Rata-rata Jumlah Peminjam')
+        ax6.set_title('Pola Mingguan Peminjaman Sepeda - Casual vs Registered')
+        ax6.set_xticks(range(7))
+        ax6.set_xticklabels(['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'])
+        ax6.grid(alpha=0.3)
+        ax6.legend()
+        plt.tight_layout()
+        st.pyplot(fig6)
+    
     with user_tabs[1]:
         st.subheader("Proporsi Tipe Pengguna (Hari Libur)")
         holiday_data = filtered_df[filtered_df['workingday'] == 0]
