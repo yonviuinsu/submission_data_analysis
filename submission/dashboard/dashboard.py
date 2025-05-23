@@ -235,8 +235,8 @@ if not filtered_df.empty:
         ax6.legend()
         plt.tight_layout()
         st.pyplot(fig6)
-    
-    with user_tabs[1]:
+    # Tab 3: Proporsi Tipe Pengguna (Hari Kerja)
+    with user_tabs[2]:
         st.subheader("Proporsi Tipe Pengguna (Hari Libur)")
         holiday_data = filtered_df[filtered_df['workingday'] == 0]
         if not holiday_data.empty:
@@ -255,8 +255,8 @@ if not filtered_df.empty:
         else:
             st.info("Tidak ada data hari libur yang tersedia dengan filter yang dipilih.")
             
-    # Tab 3: Proporsi Tipe Pengguna (Hari Kerja)
-    with user_tabs[2]:
+    # Tab 4: Proporsi Tipe Pengguna (Hari Kerja)
+    with user_tabs[3]:
         st.subheader("Proporsi Tipe Pengguna (Hari Kerja)")
         workday_data = filtered_df[filtered_df['workingday'] == 1]
         if not workday_data.empty:
