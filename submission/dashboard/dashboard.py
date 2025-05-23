@@ -181,7 +181,7 @@ if not filtered_df.empty:
     st.subheader("Pertanyaan: Bagaimana perbandingan pola peminjaman antara pengguna casual dan registered berdasarkan hari kerja dan hari libur?")
     
     # Menggunakan tabs untuk visualisasi kedua
-    user_tabs = st.tabs(["Perbandingan Pengguna", "Proporsi Hari Libur", "Proporsi Hari Kerja"])
+    user_tabs = st.tabs(["Perbandingan Pengguna", "Pola Mingguan", "Proporsi Hari Libur", "Proporsi Hari Kerja"])
     
     # Tab 1: Perbandingan Pengguna
     with user_tabs[0]:
@@ -214,8 +214,7 @@ if not filtered_df.empty:
         plt.tight_layout()
         st.pyplot(fig5)
     
-    # Tab 2: Proporsi Tipe Pengguna (Hari Libur)
-    # Tab 2: Proporsi Tipe Pengguna (Hari Libur)
+    # Tab 2: Pola Mingguan
     with user_tabs[1]:
         st.subheader("Pola Mingguan Pengguna Casual vs Registered")
         
@@ -235,41 +234,42 @@ if not filtered_df.empty:
         ax6.legend()
         plt.tight_layout()
         st.pyplot(fig6)
-    # Tab 3: Proporsi Tipe Pengguna (Hari Kerja)
+    
+    # Tab 3: Proporsi Tipe Pengguna (Hari Libur)
     with user_tabs[2]:
         st.subheader("Proporsi Tipe Pengguna (Hari Libur)")
         holiday_data = filtered_df[filtered_df['workingday'] == 0]
         if not holiday_data.empty:
-            fig6, ax6 = plt.subplots(figsize=(8, 8))
+            fig7, ax7 = plt.subplots(figsize=(8, 8))
             holiday_avg = holiday_data[['casual', 'registered']].mean()
-            ax6.pie(
+            ax7.pie(
                 holiday_avg, 
                 labels=['Casual', 'Registered'], 
                 autopct='%1.1f%%',
                 startangle=90,
                 colors=['#ff9999','#66b3ff']
             )
-            ax6.set_title('Proporsi Pengguna pada Hari Libur')
+            ax7.set_title('Proporsi Pengguna pada Hari Libur')
             plt.tight_layout()
             st.pyplot(fig7)
         else:
             st.info("Tidak ada data hari libur yang tersedia dengan filter yang dipilih.")
-            
+    
     # Tab 4: Proporsi Tipe Pengguna (Hari Kerja)
     with user_tabs[3]:
         st.subheader("Proporsi Tipe Pengguna (Hari Kerja)")
         workday_data = filtered_df[filtered_df['workingday'] == 1]
         if not workday_data.empty:
-            fig7, ax7 = plt.subplots(figsize=(8, 8))
+            fig8, ax8 = plt.subplots(figsize=(8, 8))
             workday_avg = workday_data[['casual', 'registered']].mean()
-            ax7.pie(
+            ax8.pie(
                 workday_avg, 
                 labels=['Casual', 'Registered'], 
                 autopct='%1.1f%%',
                 startangle=90,
                 colors=['#ff9999','#66b3ff']
             )
-            ax7.set_title('Proporsi Pengguna pada Hari Kerja')
+            ax8.set_title('Proporsi Pengguna pada Hari Kerja')
             plt.tight_layout()
             st.pyplot(fig8)
         else:
