@@ -12,13 +12,13 @@ st.set_page_config(
 )
 
 # Judul dashboard
-st.title("Dashboard Analisis Berbagi Sepeda")
+st.title("Dashboard Cycle Sharing Analysis")
 
 # Memuat dataset (sesuaikan path ke lokasi dataset yang telah diproses)
 @st.cache_data
 def load_data():
     # Membaca file CSV
-    day_df = pd.read_csv('dashboard\day.csv')
+    day_df = pd.read_csv('day.csv')
     # Mengubah kolom tanggal ke format datetime
     day_df['date'] = pd.to_datetime(day_df['dteday'])
     return day_df
