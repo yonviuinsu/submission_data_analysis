@@ -32,13 +32,14 @@ day_df = load_data()
 season_names = {1: 'Musim Semi', 2: 'Musim Panas', 3: 'Musim Gugur', 4: 'Musim Dingin'}
 day_df['season_name'] = day_df['season'].map(season_names)
 
+# Memetakan nilai kondisi cuaca ke nama yang lebih deskriptif
 weather_names = {1: 'Cerah', 2: 'Berawan', 3: 'Hujan/Salju Ringan', 4: 'Hujan/Salju Lebat'}
 day_df['weather_name'] = day_df['weathersit'].map(weather_names)
 
-# Filter sidebar
+# Membuat bagian filter di sidebar
 st.sidebar.header("Filter Data")
 
-# Date filter
+# Filter untuk rentang tanggal
 min_date = day_df['date'].min().date()
 max_date = day_df['date'].max().date()
 start_date, end_date = st.sidebar.date_input(
@@ -48,53 +49,58 @@ start_date, end_date = st.sidebar.date_input(
     max_value=max_date
 )
 
-# Season filter
+# Filter untuk pemilihan musim
 selected_seasons = st.sidebar.multiselect(
     "Pilih Musim",
     options=list(season_names.values()),
     default=list(season_names.values())
 )
 
-# Weather filter
+# Filter untuk kondisi cuaca
 selected_weather = st.sidebar.multiselect(
     "Pilih Kondisi Cuaca",
     options=list(weather_names.values()),
     default=list(weather_names.values())
 )
 
-# Working day filter
+# Filter untuk hari kerja/libur
 working_day_options = ["Hari Kerja", "Hari Libur", "Semua"]
 selected_working_day = st.sidebar.radio("Status Hari", working_day_options)
 
-# Apply filters
+# Menerapkan filter ke dataframe
 filtered_df = day_df.copy()
 
-# Date filter
+# Menerapkan filter tanggal
 filtered_df = filtered_df[(filtered_df['date'].dt.date >= start_date) & 
                            (filtered_df['date'].dt.date <= end_date)]
 
-# Season filter
+# Menerapkan filter musim
 if selected_seasons:
     filtered_df = filtered_df[filtered_df['season_name'].isin(selected_seasons)]
 
-# Weather filter
+# Menerapkan filter cuaca
 if selected_weather:
     filtered_df = filtered_df[filtered_df['weather_name'].isin(selected_weather)]
 
-# Working day filter
+# Menerapkan filter hari kerja/libur
 if selected_working_day == "Hari Kerja":
     filtered_df = filtered_df[filtered_df['workingday'] == 1]
 elif selected_working_day == "Hari Libur":
     filtered_df = filtered_df[filtered_df['workingday'] == 0]
 
-# Visualization tabs
-tab1, tab2, tab3, tab4 = st.tabs(["Tren Harian", "Analisis Musim", "Analisis Cuaca", "Analisis Hari Kerja"])
+# Bagian Pertanyaan Analisis 1: Faktor-faktor yang mempengaruhi jumlah peminjaman sepeda
+st.header("Analisis Tren dan Faktor yang Mempengaruhi Peminjaman Sepeda")
 
-with tab1:
-    st.header("Tren Jumlah Peminjaman Sepeda Harian")
+if not filtered_df.empty:
+    st.subheader("Pertanyaan: Bagaimana tren jumlah peminjaman sepeda harian selama dua tahun terakhir, dan faktor apa saja yang memengaruhinya (musim, cuaca, hari kerja/libur)?")
     
-    if not filtered_df.empty:
-        fig1, ax1 = plt.subplots(figsize=(14, 5))
+    # Membagi visualisasi menjadi beberapa baris 
+    col1, col2 = st.columns(2)
+    
+    # Visualisasi 1: Tren Harian
+    with col1:
+        st.subheader("Tren Jumlah Peminjaman Sepeda Harian")
+        fig1, ax1 = plt.subplots(figsize=(10, 5))
         ax1.plot(filtered_df['date'], filtered_df['cnt'], label='Jumlah Peminjam Harian', color='tab:blue', linewidth=1)
         ax1.set_title('Tren Jumlah Peminjam Sepeda Harian')
         ax1.set_xlabel('Tanggal')
@@ -102,14 +108,11 @@ with tab1:
         ax1.grid(alpha=0.3)
         plt.tight_layout()
         st.pyplot(fig1)
-    else:
-        st.warning("Tidak ada data yang sesuai dengan filter yang dipilih.")
-
-with tab2:
-    st.header("Rata-rata Jumlah Peminjam Sepeda per Musim")
     
-    if not filtered_df.empty:
-        fig2, ax2 = plt.subplots(figsize=(10, 6))
+    # Visualisasi 2: Berdasarkan Musim
+    with col2:
+        st.subheader("Rata-rata Jumlah Peminjam per Musim")
+        fig2, ax2 = plt.subplots(figsize=(10, 5))
         seasonal_avg = filtered_df.groupby('season_name')['cnt'].mean().reset_index()
         sns.barplot(x='season_name', y='cnt', data=seasonal_avg, palette='Set2', ax=ax2)
         ax2.set_title('Rata-rata Jumlah Peminjam Sepeda per Musim')
@@ -117,14 +120,13 @@ with tab2:
         ax2.set_ylabel('Rata-rata Jumlah Peminjam')
         plt.tight_layout()
         st.pyplot(fig2)
-    else:
-        st.warning("Tidak ada data yang sesuai dengan filter yang dipilih.")
-
-with tab3:
-    st.header("Rata-rata Jumlah Peminjam Sepeda per Kondisi Cuaca")
     
-    if not filtered_df.empty:
-        fig3, ax3 = plt.subplots(figsize=(10, 6))
+    col3, col4 = st.columns(2)
+    
+    # Visualisasi 3: Berdasarkan Kondisi Cuaca
+    with col3:
+        st.subheader("Rata-rata Jumlah Peminjam per Kondisi Cuaca")
+        fig3, ax3 = plt.subplots(figsize=(10, 5))
         weather_avg = filtered_df.groupby('weather_name')['cnt'].mean().reset_index()
         sns.barplot(x='weather_name', y='cnt', data=weather_avg, palette='Set1', ax=ax3)
         ax3.set_title('Rata-rata Jumlah Peminjam Sepeda per Kondisi Cuaca')
@@ -132,44 +134,43 @@ with tab3:
         ax3.set_ylabel('Rata-rata Jumlah Peminjam')
         plt.tight_layout()
         st.pyplot(fig3)
-    else:
-        st.warning("Tidak ada data yang sesuai dengan filter yang dipilih.")
-
-with tab4:
-    st.header("Rata-rata Jumlah Peminjam Sepeda (Hari Kerja vs Hari Libur)")
-
-    if not filtered_df.empty:
-        # Ganti nama kolom agar sesuai jika perlu
-        day_df = filtered_df.rename(columns={'cnt': 'total_count'})
-
-        # Plot sesuai dengan gaya yang kamu berikan
-        fig, ax = plt.subplots(figsize=(6, 4))
+    
+    # Visualisasi 4: Berdasarkan Status Hari
+    with col4:
+        st.subheader("Hari Kerja vs Hari Libur")
+        fig4, ax4 = plt.subplots(figsize=(10, 5))
         sns.barplot(
             x='workingday', 
-            y='total_count', 
-            hue='workingday', 
-            data=day_df, 
+            y='cnt', 
+            hue='workingday',
+            data=filtered_df, 
             estimator=np.mean, 
             errorbar=None, 
             palette='pastel',
-            ax=ax
+            ax=ax4
         )
-    
-        ax.set_title('Rata-rata Jumlah Peminjam Sepeda\n(Hari Kerja vs Hari Libur)')
-        ax.set_xlabel('Hari Kerja (0: Libur, 1: Kerja)')
-        ax.set_ylabel('Rata-rata Jumlah Peminjam')
+        ax4.set_xticklabels(['Hari Libur', 'Hari Kerja'])
+        ax4.set_title('Rata-rata Jumlah Peminjam Sepeda\n(Hari Kerja vs Hari Libur)')
+        ax4.set_xlabel('Jenis Hari')
+        ax4.set_ylabel('Rata-rata Jumlah Peminjam')
+        ax4.legend([],[], frameon=False)
         plt.tight_layout()
-    
-        st.pyplot(fig)
-    else:
-        st.warning("Tidak ada data yang sesuai dengan filter yang dipilih.")
+        st.pyplot(fig4)
+else:
+    st.warning("Tidak ada data yang sesuai dengan filter yang dipilih.")
 
-# Kesimpulan
-st.header("Kesimpulan")
+# Bagian kesimpulan
+st.subheader("Jawaban dan Kesimpulan")
 st.write("""
-**Penjelasan:**
-- Grafik tren harian menunjukkan adanya pola musiman dan peningkatan jumlah peminjam dari tahun 2011 ke 2012.
-- Rata-rata jumlah peminjam tertinggi terjadi pada musim panas dan gugur, dan terendah pada musim dingin.
-- Kondisi cuaca sangat memengaruhi jumlah peminjam: cuaca cerah menghasilkan peminjaman tertinggi, sedangkan cuaca buruk menurunkan jumlah peminjam secara signifikan.
-- Hari kerja cenderung memiliki jumlah peminjam lebih tinggi dibanding hari libur, menunjukkan banyak pengguna menggunakan sepeda untuk aktivitas rutin.
+Berdasarkan analisis di atas:
+
+1. **Tren Harian**: Terdapat pola musiman dalam peminjaman sepeda dengan peningkatan signifikan dari tahun 2011 ke 2012, menunjukkan pertumbuhan popularitas layanan berbagi sepeda.
+
+2. **Faktor Musim**: Musim panas dan musim gugur memiliki rata-rata peminjaman sepeda tertinggi, sementara musim dingin menunjukkan angka terendah. Ini mengindikasikan bahwa kondisi cuaca yang lebih hangat lebih disukai untuk bersepeda.
+
+3. **Faktor Cuaca**: Kondisi cuaca sangat mempengaruhi peminjaman sepeda di mana:
+   - Cuaca cerah menghasilkan jumlah peminjaman tertinggi
+   - Cuaca hujan/salju ringan dan lebat mengurangi minat bersepeda secara signifikan
+
+4. **Faktor Hari Kerja/Libur**: Hari kerja umumnya memiliki jumlah peminjam lebih tinggi dibanding hari libur, menunjukkan bahwa sepeda banyak digunakan untuk aktivitas rutin seperti perjalanan ke tempat kerja.
 """)
