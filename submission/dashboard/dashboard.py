@@ -174,3 +174,101 @@ Berdasarkan analisis di atas:
 
 4. **Faktor Hari Kerja/Libur**: Hari kerja umumnya memiliki jumlah peminjam lebih tinggi dibanding hari libur, menunjukkan bahwa sepeda banyak digunakan untuk aktivitas rutin seperti perjalanan ke tempat kerja.
 """)
+
+# Bagian Pertanyaan Analisis 2: Perbandingan pola peminjaman antara casual vs registered
+st.header("Analisis Perbandingan Tipe Pengguna")
+
+if not filtered_df.empty:
+    st.subheader("Pertanyaan: Bagaimana perbandingan pola peminjaman antara pengguna casual dan registered berdasarkan hari kerja dan hari libur?")
+    
+    # Visualisasi perbandingan casual vs registered
+    st.subheader("Perbandingan Pengguna Casual vs Registered")
+    
+    fig5, ax5 = plt.subplots(figsize=(12, 6))
+    user_comparison = filtered_df.melt(
+        id_vars=['workingday'],
+        value_vars=['casual', 'registered'],
+        var_name='User Type',
+        value_name='Count'
+    )
+    
+    sns.barplot(
+        data=user_comparison,
+        x='workingday',
+        y='Count',
+        hue='User Type',
+        estimator=np.mean,
+        errorbar=None,
+        palette='viridis',
+        ax=ax5
+    )
+    
+    ax5.set_xticklabels(['Hari Libur', 'Hari Kerja'])
+    ax5.set_title('Rata-rata Jumlah Peminjam Casual vs Registered\n(Hari Kerja vs Hari Libur)')
+    ax5.set_xlabel('Jenis Hari')
+    ax5.set_ylabel('Rata-rata Jumlah Peminjam')
+    ax5.legend(title='Tipe Pengguna')
+    plt.tight_layout()
+    st.pyplot(fig5)
+    
+    # Menambahkan visualisasi perbandingan proporsi dalam bentuk pie chart
+    col5, col6 = st.columns(2)
+    
+    with col5:
+        st.subheader("Proporsi Tipe Pengguna (Hari Libur)")
+        holiday_data = filtered_df[filtered_df['workingday'] == 0]
+        if not holiday_data.empty:
+            fig6, ax6 = plt.subplots(figsize=(8, 8))
+            holiday_avg = holiday_data[['casual', 'registered']].mean()
+            ax6.pie(
+                holiday_avg, 
+                labels=['Casual', 'Registered'], 
+                autopct='%1.1f%%',
+                startangle=90,
+                colors=['#ff9999','#66b3ff']
+            )
+            ax6.set_title('Proporsi Pengguna pada Hari Libur')
+            plt.tight_layout()
+            st.pyplot(fig6)
+        else:
+            st.info("Tidak ada data hari libur yang tersedia dengan filter yang dipilih.")
+            
+    with col6:
+        st.subheader("Proporsi Tipe Pengguna (Hari Kerja)")
+        workday_data = filtered_df[filtered_df['workingday'] == 1]
+        if not workday_data.empty:
+            fig7, ax7 = plt.subplots(figsize=(8, 8))
+            workday_avg = workday_data[['casual', 'registered']].mean()
+            ax7.pie(
+                workday_avg, 
+                labels=['Casual', 'Registered'], 
+                autopct='%1.1f%%',
+                startangle=90,
+                colors=['#ff9999','#66b3ff']
+            )
+            ax7.set_title('Proporsi Pengguna pada Hari Kerja')
+            plt.tight_layout()
+            st.pyplot(fig7)
+        else:
+            st.info("Tidak ada data hari kerja yang tersedia dengan filter yang dipilih.")
+    
+    # Kesimpulan analisis
+    st.subheader("Jawaban dan Kesimpulan")
+    st.write("""
+    Berdasarkan perbandingan pola peminjaman sepeda antara pengguna casual dan registered:
+    
+    1. **Pengguna Casual**:
+       - Lebih aktif pada hari libur dibandingkan hari kerja
+       - Menunjukkan pola penggunaan yang cenderung untuk rekreasi dan aktivitas akhir pekan
+    
+    2. **Pengguna Registered**:
+       - Jauh lebih dominan pada hari kerja
+       - Menunjukkan pola yang konsisten sebagai pengguna reguler, kemungkinan menggunakan sepeda untuk kegiatan rutin seperti perjalanan ke tempat kerja
+    
+    3. **Implikasi Bisnis**:
+       - Strategi pemasaran yang berbeda dapat diterapkan untuk kedua segmen pengguna
+       - Pengguna registered merupakan basis pelanggan yang lebih stabil dan dapat menjadi target untuk program loyalitas
+       - Pengguna casual memiliki potensi untuk dikonversi menjadi pengguna registered melalui promosi khusus
+    """)
+else:
+    st.warning("Tidak ada data yang sesuai dengan filter yang dipilih.")
