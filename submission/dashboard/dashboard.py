@@ -29,10 +29,10 @@ def load_data():
 day_df = load_data()
 
 # Memetakan nilai musim dan cuaca ke nama untuk keterbacaan yang lebih baik
-season_names = {1: 'Spring', 2: 'Summer', 3: 'Fall', 4: 'Winter'}
+season_names = {1: 'Musim Semi', 2: 'Musim Panas', 3: 'Musim Gugur', 4: 'Musim Dingin'}
 day_df['season_name'] = day_df['season'].map(season_names)
 
-weather_names = {1: 'Clear', 2: 'Cloudy', 3: 'Light Rain/Snow', 4: 'Heavy Rain/Snow'}
+weather_names = {1: 'Cerah', 2: 'Berawan', 3: 'Hujan/Salju Ringan', 4: 'Hujan/Salju Lebat'}
 day_df['weather_name'] = day_df['weathersit'].map(weather_names)
 
 # Filter sidebar
