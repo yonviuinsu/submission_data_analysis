@@ -174,7 +174,201 @@ Berdasarkan analisis di atas:
 """)
 
 
+# Bagian Pertanyaan Analisis 2: Perbandingan pola peminjaman antara casual vs registered
+st.header("Analisis Perbandingan Tipe Pengguna")
 
+if not filtered_df.empty:
+    st.subheader("Pertanyaan: Bagaimana perbandingan pola peminjaman antara pengguna casual dan registered berdasarkan hari kerja dan hari libur?")
+    
+    # Menggunakan tabs untuk visualisasi kedua
+    user_tabs = st.tabs(["Perbandingan Pengguna", "Pola Mingguan", "Proporsi Hari Libur", "Proporsi Hari Kerja"])
+    
+    # Tab 1: Perbandingan Pengguna
+    with user_tabs[0]:
+        st.subheader("Perbandingan Pengguna Casual vs Registered")
+        
+        fig5, ax5 = plt.subplots(figsize=(12, 6))
+        user_comparison = filtered_df.melt(
+            id_vars=['workingday'],
+            value_vars=['casual', 'registered'],
+            var_name='User Type',
+            value_name='Count'
+        )
+        
+        sns.barplot(
+            data=user_comparison,
+            x='workingday',
+            y='Count',
+            hue='User Type',
+            estimator=np.mean,
+            errorbar=None,
+            palette='viridis',
+            ax=ax5
+        )
+        
+        ax5.set_xticklabels(['Hari Libur', 'Hari Kerja'])
+        ax5.set_title('Rata-rata Jumlah Peminjam Casual vs Registered\n(Hari Kerja vs Hari Libur)')
+        ax5.set_xlabel('Jenis Hari')
+        ax5.set_ylabel('Rata-rata Jumlah Peminjam')
+        ax5.legend(title='Tipe Pengguna')
+        plt.tight_layout()
+        st.pyplot(fig5)
+    
+    # Tab 2: Pola Mingguan
+    with user_tabs[1]:
+        st.subheader("Pola Mingguan Pengguna Casual vs Registered")
+        
+        # Visualisasi tren pola mingguan untuk pengguna casual dan registered
+        fig6, ax6 = plt.subplots(figsize=(12, 6))
+        weekday_avg = filtered_df.groupby('weekday')[['casual', 'registered']].mean().reset_index()
+        weekday_avg['day_name'] = weekday_avg['weekday'].apply(lambda x: ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'][x])
+        
+        ax6.plot(weekday_avg['weekday'], weekday_avg['casual'], marker='o', linewidth=2, label='Casual')
+        ax6.plot(weekday_avg['weekday'], weekday_avg['registered'], marker='s', linewidth=2, label='Registered')
+        ax6.set_xlabel('Hari dalam Seminggu')
+        ax6.set_ylabel('Rata-rata Jumlah Peminjam')
+        ax6.set_title('Pola Mingguan Peminjaman Sepeda - Casual vs Registered')
+        ax6.set_xticks(range(7))
+        ax6.set_xticklabels(['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'])
+        ax6.grid(alpha=0.3)
+        ax6.legend()
+        plt.tight_layout()
+        st.pyplot(fig6)
+    
+    # Tab 3: Proporsi Tipe Pengguna (Hari Libur)
+    with user_tabs[2]:
+        st.subheader("Proporsi Tipe Pengguna (Hari Libur)")
+        holiday_data = filtered_df[filtered_df['workingday'] == 0]
+        if not holiday_data.empty:
+            fig7, ax7 = plt.subplots(figsize=(8, 8))
+            holiday_avg = holiday_data[['casual', 'registered']].mean()
+            ax7.pie(
+                holiday_avg, 
+                labels=['Casual', 'Registered'], 
+                autopct='%1.1f%%',
+                startangle=90,
+                colors=['#ff9999','#66b3ff']
+            )
+            ax7.set_title('Proporsi Pengguna pada Hari Libur')
+            plt.tight_layout()
+            st.pyplot(fig7)
+        else:
+            st.info("Tidak ada data hari libur yang tersedia dengan filter yang dipilih.")
+    
+    # Tab 4: Proporsi Tipe Pengguna (Hari Kerja)
+    with user_tabs[3]:
+        st.subheader("Proporsi Tipe Pengguna (Hari Kerja)")
+        workday_data = filtered_df[filtered_df['workingday'] == 1]
+        if not workday_data.empty:
+            fig8, ax8 = plt.subplots(figsize=(8, 8))
+            workday_avg = workday_data[['casual', 'registered']].mean()
+            ax8.pie(
+                workday_avg, 
+                labels=['Casual', 'Registered'], 
+                autopct='%1.1f%%',
+                startangle=90,
+                colors=['#ff9999','#66b3ff']
+            )
+            ax8.set_title('Proporsi Pengguna pada Hari Kerja')
+            plt.tight_layout()
+            st.pyplot(fig8)
+        else:
+            st.info("Tidak ada data hari kerja yang tersedia dengan filter yang dipilih.")
+    
+    # Kesimpulan analisis
+    st.subheader("Jawaban dan Kesimpulan")
+    st.write("""
+    Berdasarkan perbandingan pola peminjaman sepeda antara pengguna casual dan registered:
+    
+    1. **Pengguna Casual**:
+       - Lebih aktif pada hari libur dibandingkan hari kerja
+       - Menunjukkan pola penggunaan yang cenderung untuk rekreasi dan aktivitas akhir pekan
+    
+    2. **Pengguna Registered**:
+       - Jauh lebih dominan pada hari kerja
+       - Menunjukkan pola yang konsisten sebagai pengguna reguler, kemungkinan menggunakan sepeda untuk kegiatan rutin seperti perjalanan ke tempat kerja
+    
+    3. **Implikasi Bisnis**:
+       - Strategi pemasaran yang berbeda dapat diterapkan untuk kedua segmen pengguna
+       - Pengguna registered merupakan basis pelanggan yang lebih stabil dan dapat menjadi target untuk program loyalitas
+       - Pengguna casual memiliki potensi untuk dikonversi menjadi pengguna registered melalui promosi khusus
+    """)
+else:
+    st.warning("Tidak ada data yang sesuai dengan filter yang dipilih.")
+
+# Bagian Pertanyaan Analisis 3: Korelasi variabel cuaca dengan jumlah peminjaman sepeda
+st.header("Analisis Pengaruh Faktor Cuaca")
+
+if not filtered_df.empty:
+    st.subheader("Pertanyaan: Bagaimana pengaruh faktor cuaca (suhu, kelembapan, kecepatan angin) terhadap jumlah peminjaman sepeda?")
+        
+    # Membuat tabs untuk visualisasi ketiga
+    weather_tabs = st.tabs(["Korelasi", "Hubungan Faktor Cuaca"])
+        
+    # Tab 1: Heatmap Korelasi
+    with weather_tabs[0]:
+        st.subheader("Korelasi Variabel Cuaca dengan Jumlah Peminjaman")
+            
+        # Menghitung korelasi variabel numerik
+        num_cols = ['temp', 'atemp', 'hum', 'windspeed', 'cnt']
+        corr = filtered_df[num_cols].corr()
+            
+        fig9, ax9 = plt.subplots(figsize=(10, 8))
+        sns.heatmap(corr, annot=True, cmap='coolwarm', fmt=".2f", ax=ax9)
+        ax9.set_title('Heatmap Korelasi Variabel Numerik dengan Jumlah Peminjam Sepeda')
+        plt.tight_layout()
+        st.pyplot(fig9)
+        
+    # Tab 2: Scatter plots
+    with weather_tabs[1]:
+        st.subheader("Hubungan Faktor Cuaca dengan Jumlah Peminjaman")
+            
+        fig10, axs = plt.subplots(1, 3, figsize=(18, 5))
+            
+        sns.scatterplot(data=filtered_df, x='temp', y='cnt', ax=axs[0])
+        axs[0].set_title('Suhu vs Jumlah Peminjam')
+        axs[0].set_xlabel('Suhu (Normalisasi)')
+        axs[0].set_ylabel('Jumlah Peminjam')
+            
+        sns.scatterplot(data=filtered_df, x='hum', y='cnt', ax=axs[1])
+        axs[1].set_title('Kelembapan vs Jumlah Peminjam')
+        axs[1].set_xlabel('Kelembapan (Normalisasi)')
+        axs[1].set_ylabel('Jumlah Peminjam')
+            
+        sns.scatterplot(data=filtered_df, x='windspeed', y='cnt', ax=axs[2])
+        axs[2].set_title('Kecepatan Angin vs Jumlah Peminjam')
+        axs[2].set_xlabel('Kecepatan Angin (Normalisasi)')
+        axs[2].set_ylabel('Jumlah Peminjam')
+            
+        plt.tight_layout()
+        st.pyplot(fig10)
+        
+    # Kesimpulan Analisis
+    st.subheader("Jawaban dan Kesimpulan")
+    st.write("""
+    Berdasarkan analisis pengaruh faktor cuaca terhadap jumlah peminjaman sepeda:
+        
+    1. **Suhu (temp, atemp)**:
+        - Memiliki korelasi positif yang cukup kuat dengan jumlah peminjam sepeda
+        - Semakin hangat suhu, semakin banyak peminjaman sepeda
+        - Ini menunjukkan bahwa kondisi hangat lebih disukai untuk aktivitas bersepeda
+        
+    2. **Kelembapan (hum)**:
+        - Memiliki korelasi negatif dengan jumlah peminjaman
+        - Kelembapan tinggi cenderung menurunkan minat peminjaman sepeda
+        - Kondisi lembab mungkin kurang nyaman untuk bersepeda
+        
+    3. **Kecepatan Angin (windspeed)**:
+        - Juga memiliki korelasi negatif, namun lebih lemah dibanding kelembapan
+        - Angin kencang dapat membuat perjalanan bersepeda lebih sulit dan kurang nyaman
+        
+    4. **Implikasi Bisnis**:
+        - Perencanaan persediaan sepeda dapat dioptimalkan berdasarkan prediksi cuaca
+        - Promosi khusus dapat dilakukan pada hari-hari dengan kondisi cuaca yang kurang ideal
+        - Pertimbangan untuk menyediakan fasilitas perlindungan atau penyewaan perlengkapan tambahan pada kondisi cuaca tertentu
+    """)
+else:
+    st.warning("Tidak ada data yang sesuai dengan filter yang dipilih.")
 
 # Bagian Pertanyaan Analisis 4: Analisis tren musiman dan pertumbuhan tahunan
 st.header("Analisis Tren Musiman dan Pertumbuhan Tahunan")
