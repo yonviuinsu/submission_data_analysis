@@ -18,7 +18,7 @@ st.title("Dashboard Analisis Berbagi Sepeda")
 @st.cache_data
 def load_data():
     # Membaca file CSV
-    day_df = pd.read_csv('day.csv')
+    day_df = pd.read_csv('dashboard/day.csv')
     # Mengubah kolom tanggal ke format datetime
     day_df['date'] = pd.to_datetime(day_df['dteday'])
     return day_df
