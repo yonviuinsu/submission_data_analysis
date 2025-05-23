@@ -373,109 +373,107 @@ else:
 # Bagian Pertanyaan Analisis 4: Analisis tren musiman dan pertumbuhan tahunan
 st.header("Analisis Tren Musiman dan Pertumbuhan Tahunan")
 
-if not filtered_df.empty:
-    st.subheader("Pertanyaan: Bagaimana pola tren musiman dan pertumbuhan tahunan peminjaman sepeda selama periode 2011-2012?")
+# Gunakan data asli tanpa filter untuk analisis ini
+trend_df = day_df.copy()
+trend_df['year'] = trend_df['date'].dt.year - 2011  # 0 untuk 2011, 1 untuk 2012
+trend_df['month'] = trend_df['date'].dt.month
+trend_df['total_count'] = trend_df['cnt']  # Menggunakan total count untuk analisis
+
+st.subheader("Pertanyaan: Bagaimana pola tren musiman dan pertumbuhan tahunan peminjaman sepeda selama periode 2011-2012?")
+
+# Membuat tabs untuk visualisasi keempat
+trend_tabs = st.tabs(["Tren Bulanan", "Perbandingan Kuartal", "Pola Mingguan"])
+
+# Tab 1: Tren Bulanan
+with trend_tabs[0]:
+    st.subheader("Tren Musiman Peminjaman Sepeda per Bulan")
     
-    # Persiapan data untuk analisis musiman dan tahunan
-    filtered_df['year'] = filtered_df['date'].dt.year - 2011  # 0 untuk 2011, 1 untuk 2012
-    filtered_df['month'] = filtered_df['date'].dt.month
-    filtered_df['total_count'] = filtered_df['cnt']  # Menggunakan total count untuk analisis
+    # Visualisasi tren musiman per bulan
+    fig11, ax11 = plt.subplots(figsize=(12, 6))
+    monthly_data = trend_df.groupby(['year', 'month'])['total_count'].mean().reset_index()
+    month_names = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+    monthly_data['month_name'] = monthly_data['month'].apply(lambda x: month_names[x-1])
+
+    # Plot untuk setiap tahun
+    for year in sorted(monthly_data['year'].unique()):
+        year_data = monthly_data[monthly_data['year'] == year]
+        ax11.plot(year_data['month'], year_data['total_count'], 
+                marker='o', 
+                linewidth=2, 
+                label=f'Tahun {year+2011}')
     
-    # Membuat tabs untuk visualisasi keempat
-    trend_tabs = st.tabs(["Tren Bulanan", "Perbandingan Kuartal", "Pola Mingguan"])
+    ax11.set_xlabel('Bulan')
+    ax11.set_ylabel('Rata-rata Jumlah Peminjam')
+    ax11.set_title('Tren Musiman Peminjaman Sepeda per Bulan (2011-2012)')
+    ax11.set_xticks(range(1, 13))
+    ax11.set_xticklabels(month_names)
+    ax11.grid(alpha=0.3)
+    ax11.legend()
+    plt.tight_layout()
+    st.pyplot(fig11)
+
+# Tab 2: Perbandingan Kuartal
+with trend_tabs[1]:
+    st.subheader("Perbandingan Rata-rata Peminjaman per Kuartal")
     
-    # Tab 1: Tren Bulanan
-    with trend_tabs[0]:
-        st.subheader("Tren Musiman Peminjaman Sepeda per Bulan")
-        
-        # Visualisasi tren musiman per bulan
-        fig11, ax11 = plt.subplots(figsize=(12, 6))
-        monthly_data = filtered_df.groupby(['year', 'month'])['total_count'].mean().reset_index()
-        month_names = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-        monthly_data['month_name'] = monthly_data['month'].apply(lambda x: month_names[x-1])
+    # Visualisasi tren jangka panjang: perbandingan kuartal antar tahun
+    fig12, ax12 = plt.subplots(figsize=(10, 6))
+    trend_df['quarter'] = ((trend_df['month']-1) // 3) + 1
+    quarterly_data = trend_df.groupby(['year', 'quarter'])['total_count'].mean().reset_index()
 
-        # Plot untuk setiap tahun
-        for year in sorted(monthly_data['year'].unique()):
-            year_data = monthly_data[monthly_data['year'] == year]
-            ax11.plot(year_data['month'], year_data['total_count'], 
-                    marker='o', 
-                    linewidth=2, 
-                    label=f'Tahun {year+2011}')
-        
-        ax11.set_xlabel('Bulan')
-        ax11.set_ylabel('Rata-rata Jumlah Peminjam')
-        ax11.set_title('Tren Musiman Peminjaman Sepeda per Bulan (2011-2012)')
-        ax11.set_xticks(range(1, 13))
-        ax11.set_xticklabels(month_names)
-        ax11.grid(alpha=0.3)
-        ax11.legend()
-        plt.tight_layout()
-        st.pyplot(fig11)
+    sns.barplot(x='quarter', y='total_count', hue='year', 
+              palette=['skyblue', 'orange'],
+              data=quarterly_data, ax=ax12)
+    ax12.set_xlabel('Kuartal')
+    ax12.set_ylabel('Rata-rata Jumlah Peminjam')
+    ax12.set_title('Perbandingan Rata-rata Peminjaman Sepeda per Kuartal (2011 vs 2012)')
+    ax12.set_xticks([0, 1, 2, 3])
+    ax12.set_xticklabels(['Q1 (Jan-Mar)', 'Q2 (Apr-Jun)', 'Q3 (Jul-Sep)', 'Q4 (Oct-Dec)'])
+    ax12.legend(title='Tahun', labels=['2011', '2012'])
+    ax12.grid(axis='y', alpha=0.3)
+    plt.tight_layout()
+    st.pyplot(fig12)
+
+# Tab 3: Pola Mingguan
+with trend_tabs[2]:
+    st.subheader("Perbandingan Pola Mingguan Antar Tahun")
     
-    # Tab 2: Perbandingan Kuartal
-    with trend_tabs[1]:
-        st.subheader("Perbandingan Rata-rata Peminjaman per Kuartal")
-        
-        # Visualisasi tren jangka panjang: perbandingan kuartal antar tahun
-        fig12, ax12 = plt.subplots(figsize=(10, 6))
-        filtered_df['quarter'] = ((filtered_df['month']-1) // 3) + 1
-        quarterly_data = filtered_df.groupby(['year', 'quarter'])['total_count'].mean().reset_index()
+    # Visualisasi perbandingan hari dalam seminggu antara tahun 2011 dan 2012
+    fig13, ax13 = plt.subplots(figsize=(12, 6))
+    weekday_data = trend_df.groupby(['year', 'weekday'])['total_count'].mean().reset_index()
+    day_names = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu']
+    weekday_data['day_name'] = weekday_data['weekday'].apply(lambda x: day_names[x])
 
-        sns.barplot(x='quarter', y='total_count', hue='year', 
-                  palette=['skyblue', 'orange'],
-                  data=quarterly_data, ax=ax12)
-        ax12.set_xlabel('Kuartal')
-        ax12.set_ylabel('Rata-rata Jumlah Peminjam')
-        ax12.set_title('Perbandingan Rata-rata Peminjaman Sepeda per Kuartal (2011 vs 2012)')
-        ax12.set_xticks([0, 1, 2, 3])
-        ax12.set_xticklabels(['Q1 (Jan-Mar)', 'Q2 (Apr-Jun)', 'Q3 (Jul-Sep)', 'Q4 (Oct-Dec)'])
-        ax12.legend(title='Tahun', labels=['2011', '2012'])
-        ax12.grid(axis='y', alpha=0.3)
-        plt.tight_layout()
-        st.pyplot(fig12)
-    
-    # Tab 3: Pola Mingguan
-    with trend_tabs[2]:
-        st.subheader("Perbandingan Pola Mingguan Antar Tahun")
-        
-        # Visualisasi perbandingan hari dalam seminggu antara tahun 2011 dan 2012
-        fig13, ax13 = plt.subplots(figsize=(12, 6))
-        weekday_data = filtered_df.groupby(['year', 'weekday'])['total_count'].mean().reset_index()
-        day_names = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu']
-        weekday_data['day_name'] = weekday_data['weekday'].apply(lambda x: day_names[x])
+    sns.lineplot(data=weekday_data, x='weekday', y='total_count', hue='year', 
+               marker='o', markersize=10, linewidth=2,
+               palette=['skyblue', 'orange'], ax=ax13)
+    ax13.set_xlabel('Hari dalam Seminggu')
+    ax13.set_ylabel('Rata-rata Jumlah Peminjam')
+    ax13.set_title('Perbandingan Pola Mingguan Peminjaman Sepeda (2011 vs 2012)')
+    ax13.set_xticks(range(7))
+    ax13.set_xticklabels(day_names)
+    ax13.legend(title='Tahun', labels=['2011', '2012'])
+    ax13.grid(alpha=0.3)
+    plt.tight_layout()
+    st.pyplot(fig13)
 
-        sns.lineplot(data=weekday_data, x='weekday', y='total_count', hue='year', 
-                   marker='o', markersize=10, linewidth=2,
-                   palette=['skyblue', 'orange'], ax=ax13)
-        ax13.set_xlabel('Hari dalam Seminggu')
-        ax13.set_ylabel('Rata-rata Jumlah Peminjam')
-        ax13.set_title('Perbandingan Pola Mingguan Peminjaman Sepeda (2011 vs 2012)')
-        ax13.set_xticks(range(7))
-        ax13.set_xticklabels(day_names)
-        ax13.legend(title='Tahun', labels=['2011', '2012'])
-        ax13.grid(alpha=0.3)
-        plt.tight_layout()
-        st.pyplot(fig13)
-    
-    # Kesimpulan Analisis
-    st.subheader("Jawaban dan Kesimpulan")
-    st.write("""
-    **Berdasarkan analisis tren musiman dan pertumbuhan tahunan:**
+# Kesimpulan Analisis
+st.subheader("Jawaban dan Kesimpulan")
+st.write("""
+**Berdasarkan analisis tren musiman dan pertumbuhan tahunan:**
 
-    - **Tren Musiman**: Grafik bulanan menunjukkan pola musiman yang konsisten selama dua tahun berturut-turut, dengan peminjaman terendah di bulan-bulan musim dingin (Desember-Februari) dan tertinggi di bulan-bulan musim panas (Juni-September). Pola ini sangat konsisten dan dapat diprediksi.
+- **Tren Musiman**: Grafik bulanan menunjukkan pola musiman yang konsisten selama dua tahun berturut-turut, dengan peminjaman terendah di bulan-bulan musim dingin (Desember-Februari) dan tertinggi di bulan-bulan musim panas (Juni-September). Pola ini sangat konsisten dan dapat diprediksi.
 
-    - **Pertumbuhan Tahunan**: Data menunjukkan tren pertumbuhan yang jelas dari 2011 ke 2012 di semua bulan, dengan rata-rata peningkatan sekitar 50-70%. Pertumbuhan ini menandakan bahwa popularitas layanan bike sharing meningkat signifikan.
+- **Pertumbuhan Tahunan**: Data menunjukkan tren pertumbuhan yang jelas dari 2011 ke 2012 di semua bulan, dengan rata-rata peningkatan sekitar 50-70%. Pertumbuhan ini menandakan bahwa popularitas layanan bike sharing meningkat signifikan.
 
-    - **Perbandingan Kuartal**: Visualisasi kuartal dengan jelas menunjukkan bahwa Q2 (Apr-Jun) dan Q3 (Jul-Sep) secara konsisten menjadi periode puncak peminjaman sepeda, sementara Q1 (Jan-Mar) selalu menjadi periode terendah.
+- **Perbandingan Kuartal**: Visualisasi kuartal dengan jelas menunjukkan bahwa Q2 (Apr-Jun) dan Q3 (Jul-Sep) secara konsisten menjadi periode puncak peminjaman sepeda, sementara Q1 (Jan-Mar) selalu menjadi periode terendah.
 
-    - **Pola Mingguan**: Terdapat pola peminjaman mingguan yang konsisten antara 2011 dan 2012, dengan Selasa hingga Jumat menjadi hari-hari dengan peminjaman tertinggi, sementara akhir pekan menunjukkan penurunan, terutama pada hari Minggu.
+- **Pola Mingguan**: Terdapat pola peminjaman mingguan yang konsisten antara 2011 dan 2012, dengan Selasa hingga Jumat menjadi hari-hari dengan peminjaman tertinggi, sementara akhir pekan menunjukkan penurunan, terutama pada hari Minggu.
 
-    **Implikasi untuk Perencanaan Operasional dan Promosi:**
-    - Distribusi armada sepeda perlu ditingkatkan selama musim panas (Q2-Q3) untuk mengantisipasi lonjakan permintaan
-    - Promosi dan insentif khusus dapat diberikan selama musim dingin (Q1 dan Q4) untuk menjaga tingkat penggunaan
-    - Perawatan armada dapat dijadwalkan selama periode penggunaan rendah di bulan-bulan musim dingin
-    - Promosi akhir pekan dapat dirancang untuk meningkatkan penggunaan pada hari Sabtu-Minggu yang cenderung lebih rendah
-    - Persiapan ekspansi layanan perlu dilakukan mengingat tren pertumbuhan yang konsisten dari tahun ke tahun
-    """)
-else:
-    st.warning("Tidak ada data yang sesuai dengan filter yang dipilih.")
+**Implikasi untuk Perencanaan Operasional dan Promosi:**
+- Distribusi armada sepeda perlu ditingkatkan selama musim panas (Q2-Q3) untuk mengantisipasi lonjakan permintaan
+- Promosi dan insentif khusus dapat diberikan selama musim dingin (Q1 dan Q4) untuk menjaga tingkat penggunaan
+- Perawatan armada dapat dijadwalkan selama periode penggunaan rendah di bulan-bulan musim dingin
+- Promosi akhir pekan dapat dirancang untuk meningkatkan penggunaan pada hari Sabtu-Minggu yang cenderung lebih rendah
+- Persiapan ekspansi layanan perlu dilakukan mengingat tren pertumbuhan yang konsisten dari tahun ke tahun
+""")
