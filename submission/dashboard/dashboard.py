@@ -373,11 +373,11 @@ else:
 # Bagian Pertanyaan Analisis 4: Analisis tren musiman dan pertumbuhan tahunan
 st.header("Analisis Tren Musiman dan Pertumbuhan Tahunan")
 
-# Gunakan data asli tanpa filter untuk analisis ini
-trend_df = day_df.copy()
-trend_df['year'] = trend_df['date'].dt.year - 2011  # 0 untuk 2011, 1 untuk 2012
-trend_df['month'] = trend_df['date'].dt.month
-trend_df['total_count'] = trend_df['cnt']  # Menggunakan total count untuk analisis
+# Tambahkan kolom untuk keperluan analisis
+# Tidak perlu membuat dataframe baru
+day_df['year'] = day_df['date'].dt.year - 2011  # 0 untuk 2011, 1 untuk 2012
+day_df['month'] = day_df['date'].dt.month
+day_df['total_count'] = day_df['cnt']  # Menggunakan total count untuk analisis
 
 st.subheader("Pertanyaan: Bagaimana pola tren musiman dan pertumbuhan tahunan peminjaman sepeda selama periode 2011-2012?")
 
@@ -390,12 +390,12 @@ with trend_tabs[0]:
     
     # Visualisasi tren musiman per bulan
     fig11, ax11 = plt.subplots(figsize=(12, 6))
-    monthly_data = trend_df.groupby(['year', 'month'])['total_count'].mean().reset_index()
+    monthly_data = day_df.groupby(['year', 'month'])['total_count'].mean().reset_index()
     month_names = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
     monthly_data['month_name'] = monthly_data['month'].apply(lambda x: month_names[x-1])
 
     # Plot untuk setiap tahun
-    for year in sorted(monthly_data['year'].unique()):
+    for year in [0, 1]:  # Tahun 2011 (0) dan 2012 (1)
         year_data = monthly_data[monthly_data['year'] == year]
         ax11.plot(year_data['month'], year_data['total_count'], 
                 marker='o', 
@@ -418,8 +418,8 @@ with trend_tabs[1]:
     
     # Visualisasi tren jangka panjang: perbandingan kuartal antar tahun
     fig12, ax12 = plt.subplots(figsize=(10, 6))
-    trend_df['quarter'] = ((trend_df['month']-1) // 3) + 1
-    quarterly_data = trend_df.groupby(['year', 'quarter'])['total_count'].mean().reset_index()
+    day_df['quarter'] = ((day_df['month']-1) // 3) + 1
+    quarterly_data = day_df.groupby(['year', 'quarter'])['total_count'].mean().reset_index()
 
     sns.barplot(x='quarter', y='total_count', hue='year', 
               palette=['skyblue', 'orange'],
@@ -440,7 +440,7 @@ with trend_tabs[2]:
     
     # Visualisasi perbandingan hari dalam seminggu antara tahun 2011 dan 2012
     fig13, ax13 = plt.subplots(figsize=(12, 6))
-    weekday_data = trend_df.groupby(['year', 'weekday'])['total_count'].mean().reset_index()
+    weekday_data = day_df.groupby(['year', 'weekday'])['total_count'].mean().reset_index()
     day_names = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu']
     weekday_data['day_name'] = weekday_data['weekday'].apply(lambda x: day_names[x])
 
