@@ -139,36 +139,28 @@ with tab4:
     st.header("Rata-rata Jumlah Peminjam Sepeda (Hari Kerja vs Hari Libur)")
 
     if not filtered_df.empty:
-        # Menambahkan kolom kategori untuk jenis hari
-        filtered_df['day_type'] = filtered_df['workingday'].map({0: 'Hari Libur', 1: 'Hari Kerja'})
-    
-        # Membuat figure
-        fig4, ax4 = plt.subplots(figsize=(6, 4))
-    
-        # Membuat barplot rata-rata peminjaman
+        # Ganti nama kolom agar sesuai jika perlu
+        day_df = filtered_df.rename(columns={'cnt': 'total_count'})
+
+        # Plot sesuai dengan gaya yang kamu berikan
+        fig, ax = plt.subplots(figsize=(6, 4))
         sns.barplot(
-        x='day_type', 
-        y='cnt', 
-        data=filtered_df, 
-        estimator=np.mean, 
-        errorbar=None, 
-        palette='pastel',
-        ax=ax4
-    )
+            x='workingday', 
+            y='total_count', 
+            hue='workingday', 
+            data=day_df, 
+            estimator=np.mean, 
+            errorbar=None, 
+            palette='pastel',
+            ax=ax
+        )
     
-        # Menyesuaikan elemen visual
-        ax4.set_title('Rata-rata Jumlah Peminjam Sepeda\n(Hari Kerja vs Hari Libur)', fontsize=12)
-        ax4.set_xlabel('Jenis Hari')
-        ax4.set_ylabel('Rata-rata Jumlah Peminjam')
-        ax4.set_xticklabels(ax4.get_xticklabels(), fontsize=10)
-        ax4.set_yticklabels(ax4.get_yticks(), fontsize=10)
-        ax4.grid(axis='y', linestyle='--', alpha=0.5)
+        ax.set_title('Rata-rata Jumlah Peminjam Sepeda\n(Hari Kerja vs Hari Libur)')
+        ax.set_xlabel('Hari Kerja (0: Libur, 1: Kerja)')
+        ax.set_ylabel('Rata-rata Jumlah Peminjam')
+        plt.tight_layout()
     
-        # Hilangkan legend (karena hanya 1 variabel kategori)
-        ax4.legend([], [], frameon=False)
-    
-        # Tampilkan di Streamlit
-        st.pyplot(fig4)
+        st.pyplot(fig)
     else:
         st.warning("Tidak ada data yang sesuai dengan filter yang dipilih.")
 
